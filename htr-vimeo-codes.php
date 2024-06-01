@@ -20,10 +20,12 @@
 if (!defined('ABSPATH')) die();
 
 require_once(plugin_dir_path(__FILE__) . 'classes/database.php');
+require_once(plugin_dir_path(__FILE__) . 'classes/response.php');
 require_once(plugin_dir_path(__FILE__) . 'classes/code.php');
 require_once(plugin_dir_path(__FILE__) . 'classes/form-handler.php');
 
 use HTRVC\Database;
+use HTRVC\Response;
 use HTRVC\Code;
 use HTRVC\FormHandler;
 
@@ -65,14 +67,19 @@ if (!class_exists('HTRVimeoCode')) {
 
 		public function viewAdminImport () {
 			try {
-				$this->formHandler->handleFormSubmission($this->code, 'code');
+				$response = $this->formHandler->handleFormSubmission($this->code, 'code');
 				$entries = $this->code->list();
+				$entriesCount = count($entries);
 				include_once(HTRVC_PATH . 'views/admin/import.php');
 			}
 			catch (Exception $e) {
 				error_log('Caught exception: ' . $e->getMessage(), 0);
 				throw $e;
 			}
+		}
+
+		public function applyCodeAtSale () {
+			return $this->code->applyCodeAtSale();
 		}
 	}
 
@@ -83,4 +90,3 @@ if (!class_exists('HTRVimeoCode')) {
 	$database = new Database($GLOBALS['wpdb']);
 	$database->createTableCodesList();
 }
-

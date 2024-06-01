@@ -1,24 +1,20 @@
-<div class="page-wrap">
+<div class="wrap">
 	<div class="htrvc-admin-view">
 		<h1>Importer des codes Viméo</h1>
 
 		<?php
-		// Display validation error messages
-		if (isset($entry_messages['error'])) {
-			foreach ($entry_messages['error'] as $error) {
-				echo '<div class="error"><p>' . esc_html($error) . '</p></div>';
-			}
-		}
+		$messageClass = $response->isSuccess() ? 'updated' : 'error';
+		$messages = $response->getMessages();
 
-		// Display success messages
-		if (isset($entry_messages['success'])) {
-			foreach ($entry_messages['success'] as $success) {
-				echo '<div class="updated"><p>' . esc_html($success) . '</p></div>';
-			}
-		}
-
-		$entriesCount = count($entries);
-		?>
+		if (!empty($messages)) : ?>
+		<div class="<?= $messageClass; ?>">
+			<ul>
+				<?php foreach ($messages as $message) : ?>
+					<li><?= $message; ?></li>
+        <?php endforeach; ?>
+			</ul>
+		</div>
+		<?php endif; ?>
 
 		<p>Copier-coller ici une liste de codes pour les ajouter à la base de données. <br>Les codes peuvent être séparés par les caractères suivants : <kbd>,</kbd>, <kbd>;</kbd>, <kbd> </kbd> (espace ou retour à la ligne).</p>
 
