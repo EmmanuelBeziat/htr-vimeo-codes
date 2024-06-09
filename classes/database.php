@@ -42,6 +42,7 @@ class Database {
 		$schema = "
 			id mediumint(9) UNSIGNED NOT NULL AUTO_INCREMENT,
 			code varchar(255) NOT NULL,
+			movie mediumint(9) UNSIGNED NUT NULL,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY (id),
 			UNIQUE (code)

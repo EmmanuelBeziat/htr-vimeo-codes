@@ -1,21 +1,20 @@
 <?php
 /**
-	* Plugin Name: Hit The Road — Codes Viméo
-	*	Plugin URI: https://github.com/EmmanuelBeziat/htr-vimeo-codes
-	*	Description: Wordpress plugin for Hit the Road website, that allow the inclusion of multiple promo codes in a custom table.
-	*	Version: 1.0.0
-	*	Author: Emmanuel Béziat
-	*	Author URI: https://www.emmanuelbeziat.com
-	*	GitHub Plugin URI: https://github.com/EmmanuelBeziat/htr-vimeo-codes
-	*	License: MIT License
-	*	License URI: http://opensource.org/licenses/MIT
-	*
-	* @author Emmanuel Béziat
-	* @copyright Emmanuel Béziat
-	* @link https://github.com/EmmanuelBeziat/htr-vimeo-codes
-	* @package Hit The Road — Codes viméo
-	* @license http://opensource.org/licenses/MIT
-	*/
+ * Plugin Name: Hit The Road — Codes Viméo
+ * Plugin URI: https://github.com/EmmanuelBeziat/htr-vimeo-codes
+ * Description: Wordpress plugin for Hit the Road website, that allow the inclusion of multiple promo codes in a custom table.
+ * Version: 1.0.0
+ * Author: Emmanuel Béziat
+ * Author URI: https://www.emmanuelbeziat.com
+ * GitHub Plugin URI: https://github.com/EmmanuelBeziat/htr-vimeo-codes
+ * License: MIT License
+ * License URI: http://opensource.org/licenses/MIT
+ * @author Emmanuel Béziat
+ * @copyright Emmanuel Béziat
+ * @link https://github.com/EmmanuelBeziat/htr-vimeo-codes
+ * @package Hit The Road — Codes viméo
+ * @license http://opensource.org/licenses/MIT
+ */
 
 if (!defined('ABSPATH')) die();
 
@@ -36,16 +35,11 @@ if (!class_exists('HTRVimeoCode')) {
 		private $formHandler;
 
 		public function __construct () {
-			$this->defines();
 			$this->code = new Code($GLOBALS['wpdb']);
 			$this->formHandler = new FormHandler();
 			add_action('admin_menu', [$this, 'setupAdminMenu']);
 			add_action('admin_enqueue_scripts', [$this, 'addAdminAssets']);
-		}
-
-		private function defines () {
-			define('HTRVC_PATH', plugin_dir_path(__FILE__));
-			define('HTRVC_VERSION', $this->version);
+			// update_option('htr_vimeo_code_instance', $this);
 		}
 
 		public function setupAdminMenu () {
@@ -61,16 +55,21 @@ if (!class_exists('HTRVimeoCode')) {
 
 		public function addAdminAssets () {
 			wp_enqueue_media();
-			wp_enqueue_script('htrcv-admin-js', plugins_url('htr-vimeo-codes/assets/js/admin.js', __DIR__), [], HTRVC_VERSION, true);
-			wp_enqueue_style('htrcv-admin-styles', plugins_url('htr-vimeo-codes/assets/css/admin.css', __DIR__), [], HTRVC_VERSION);
+			wp_enqueue_script('htrcv-admin-js', plugins_url('htr-vimeo-codes/assets/js/admin.js', __DIR__), [], $this->version, true);
+			wp_enqueue_style('htrcv-admin-styles', plugins_url('htr-vimeo-codes/assets/css/admin.css', __DIR__), [], $this->version);
 		}
 
 		public function viewAdminImport () {
 			try {
-				$response = $this->formHandler->handleFormSubmission($this->code, 'code');
+        $query = new WP_Query([
+					'post_type' => 'movie',
+					'posts_per_page' => -1,
+				]);
+        $movies = $query->posts;
+				$response = $this->formHandler->handleFormSubmission($this->code, ['code', 'movie']);
 				$entries = $this->code->list();
 				$entriesCount = count($entries);
-				include_once(HTRVC_PATH . 'views/admin/import.php');
+				include_once(plugin_dir_path(__FILE__) . 'views/admin/import.php');
 			}
 			catch (Exception $e) {
 				error_log('Caught exception: ' . $e->getMessage(), 0);
@@ -78,8 +77,9 @@ if (!class_exists('HTRVimeoCode')) {
 			}
 		}
 
-		public function applyCodeAtSale () {
-			return $this->code->applyCodeAtSale();
+		public function applyCodeAtSale ($movieId) {
+			$vimeoCode = $this->code->applyCodeAtSale($movieId);
+			return $vimeoCode;
 		}
 	}
 

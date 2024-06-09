@@ -20,6 +20,14 @@
 
 		<form method="post" id="vimeoCodesForm">
 			<div class="form-group">
+				<select name="movie" id="ctpMovie" required aria-label="Choisir le film attaché aux codes">
+					<option value="" selected disabled>Choisir le film attaché aux codes</option>
+					<?php foreach ($movies as $movie) : ?>
+					<option value="<?= $movie->ID ?>"><?= $movie->post_title ?></option>
+					<?php endforeach; ?>
+				</select>
+			</div>
+			<div class="form-group">
 				<textarea name="code" id="vimeoCodesInput" class="form-textarea" aria-label="Liste de codes" placeholder="Code1, Code2, Code3"></textarea>
 			</div>
 			<div class="form-group">
@@ -36,14 +44,17 @@
 			<thead>
 				<tr>
 					<th>Code</th>
+					<th>Film</th>
 					<th>Date de création</th>
 					<th width="130">Action</th>
 				</tr>
 			</thead>
 			<tbody>
-				<?php foreach($entries as $entry) : ?>
+				<?php foreach($entries as $entry) :
+					$movie = get_post($entry->movie); ?>
 				<tr>
 					<td><?= esc_html($entry->code); ?></td>
+					<td><?= esc_html($movie->post_title); ?></td>
 					<td><?= esc_html($entry->created_at); ?></td>
 					<td>
 						<form method="post">

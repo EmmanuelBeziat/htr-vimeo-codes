@@ -105,20 +105,22 @@ class Code {
 
 	/**
 	 * Retrieves and deletes the first item in the database table, ensuring the operation is atomic
+	 * @param int $movieID The ID of the movie to retrieve and delete
 	 * @since 1.0.0
 	 * @return object|null Returns the deleted item object if successful, or null if the operation fails
 	 */
-	public function applyCodeAtSale (): ?object {
+	public function applyCodeAtSale ($movieId): ?object {
 		$this->database->startTransaction();
+		$item = $this->wpdb->get_row($this->wpdb->prepare("SELECT * FROM {$this->tableName} WHERE movie = %d ORDER BY id ASC LIMIT 1 FOR UPDATE", $movieId), OBJECT);
 
-		$item = $this->wpdb->get_row("SELECT * FROM {$this->tableName} ORDER BY id ASC LIMIT 1 FOR UPDATE", OBJECT);
 		if (!$item) {
-			$this->endTransaction(false);
+			$this->database->endTransaction(false);
 			return null;
 		}
 
-		if (!$this->wpdb->rows_affected || !$this->remove($item->id)) {
-			$this->endTransaction(false);
+		$remove = $this->remove($item->id);
+		if (!$remove->isSuccess()) {
+			$this->database->endTransaction(false);
 			return null;
 		}
 
